@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>My Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
+      font-family: "Helvetica Neue", sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .desktop {
+      top: 120px;
+      display: flex;
+      flex-wrap: wrap;
+      padding: 40px;
+      gap: 40px;
+      row-gap: 50px;      
+      justify-items: center;
+      position: absolute;
+    }
+
+    .icon {
+      width: 80px;
+      text-align: center;
+      color: white;
+      text-shadow: 1px 1px 3px #000;
+      cursor: grab;
+      position: relative;
+    }
+
+    .icon img {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      transition: transform 0.2s;
+    }
+
+    .icon img:hover {
+      transform: scale(1.1);
+    }
+
+    .dock {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 10px 20px;
+      display: flex;
+      gap: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .dock img {
+      width: 40px;
+      height: 40px;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    .dock img:hover {
+      transform: scale(1.2);
+    }
+
+    #config {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(15px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #config.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    .remove-button {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      background: rgba(255, 0, 0, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      font-size: 16px;
+      line-height: 28px;
+      text-align: center;
+      cursor: pointer;
+      padding: 0;
+      z-index: 10;
+    }
+
+    .hide-remove .remove-button {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div style="position: absolute; top: 10px; left: 10px; z-index: 1000;">
+    <div style="margin-bottom: 10px; background: rgba(255,255,255,0.1); padding: 10px 12px; border-radius: 20px; backdrop-filter: blur(8px);">
+      <input type="text" id="searchBox" placeholder="חיפוש בגוגל" onkeypress="searchGoogle(event)" style="padding: 5px 12px; border-radius: 16px; border: none; outline: none; background: rgba(255,255,255,0.8); font-size: 14px; width: 200px;">
+    </div>
+
+    <div style="background: rgba(255,255,255,0.1); padding: 13px 12px; border-radius: 20px; backdrop-filter: blur(8px);">
+      <button onclick="toggleConfig()">הצג / הסתר תפריט</button>
+      <button onclick="window.open('import_export.html', '_blank')">ייבוא / ייצוא</button>
+    </div>
+  </div>
+
+  <div id="config" class="hidden">
+    <h4>הוסף קישור</h4>
+    <input type="text" id="linkName" placeholder="שם">
+    <input type="text" id="linkURL" placeholder="כתובת URL">
+    <input type="text" id="linkIcon" placeholder="קובץ תמונה" value="link.png" oninput="document.getElementById('iconPreview').src = this.value || 'link.png';">
+    <br>
+    <img id="iconPreview" src="link.png" alt="תצוגה מקדימה" style="width:64px;height:64px;margin-top:10px;border-radius:12px;box-shadow:0 0 5px rgba(0,0,0,0.5);">
+    <br>
+    <button onclick="addLink()">הוסף</button>
+    <button onclick="addFolder()">הוסף תיקיה</button>
+  </div>
+
+  <div class="desktop hide-remove" id="desktop"></div>
+  <div class="dock hide-remove" id="dock"></div>
+
+  <script>
+    let links = JSON.parse(localStorage.getItem('links')) || [];
+    let dockLinks = JSON.parse(localStorage.getItem('dockLinks')) || [];
+    let configVisible = false;
+
+    function searchGoogle(event) {
+      if (event.key === 'Enter') {
+        const query = event.target.value.trim();
+        if (query) {
+          window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+        }
+      }
+    }
+
+    function toggleConfig() {
+      const config = document.getElementById('config');
+      const desktop = document.getElementById('desktop');
+      const dock = document.getElementById('dock');
+      configVisible = !configVisible;
+      config.classList.toggle('hidden', !configVisible);
+      desktop.classList.toggle('hide-remove', !configVisible);
+      dock.classList.toggle('hide-remove', !configVisible);
+    }
+
+    function addLink() {
+      const name = document.getElementById('linkName').value;
+      const url = document.getElementById('linkURL').value;
+      const icon = document.getElementById('linkIcon').value;
+      if (!name || !url || !icon) return;
+      links.push({ name, url, icon });
+      localStorage.setItem('links', JSON.stringify(links));
+      renderLinks();
+    }
+
+    function addFolder() {
+      const name = prompt("שם התיקיה:");
+      if (!name) return;
+      const folder = { name, icon: "folder.png", type: "folder", children: [] };
+      links.push(folder);
+      localStorage.setItem('links', JSON.stringify(links));
+      renderLinks();
+    }
+
+    function removeLink(index) {
+      links.splice(index, 1);
+      localStorage.setItem('links', JSON.stringify(links));
+      renderLinks();
+    }
+
+    function renderLinks() {
+      const desktop = document.getElementById('desktop');
+      desktop.innerHTML = '';
+      links.forEach((link, index) => {
+        const icon = document.createElement('div');
+        icon.className = 'icon';
+        icon.dataset.index = index;
+        if (link.type === 'folder') {
+          icon.innerHTML = `
+            <button class="remove-button" onclick="removeLink(${index})">×</button>
+            <img src="${link.icon}" alt="${link.name}" onclick="openFolder(${index})">
+            <div>${link.name}</div>
+          `;
+          icon.addEventListener('dragover', dragOver);
+          icon.addEventListener('drop', (e) => dropToFolder(e, index));
+        } else {
+          icon.draggable = true;
+          icon.innerHTML = `
+            <button class="remove-button" onclick="removeLink(${index})">×</button>
+            <a href="${link.url}" target="_blank">
+              <img src="${link.icon}" alt="${link.name}">
+              <div>${link.name}</div>
+            </a>
+          `;
+          icon.addEventListener('dragstart', dragStart);
+          icon.addEventListener('dragover', dragOver);
+          icon.addEventListener('drop', drop);
+        }
+        desktop.appendChild(icon);
+      });
+    }
+
+    function openFolder(index) {
+      const folder = links[index];
+      const desktop = document.getElementById('desktop');
+      desktop.innerHTML = '';
+      folder.children.forEach((item) => {
+        const icon = document.createElement('div');
+        icon.className = 'icon';
+        icon.innerHTML = `
+          <a href="${item.url}" target="_blank">
+            <img src="${item.icon}" alt="${item.name}">
+            <div>${item.name}</div>
+          </a>
+        `;
+        desktop.appendChild(icon);
+      });
+      const backBtn = document.createElement('button');
+      backBtn.textContent = "חזור";
+      backBtn.style = "position:absolute;top:10px;right:10px;z-index:1000";
+      backBtn.onclick = () => renderLinks();
+      document.body.appendChild(backBtn);
+    }
+
+    function dragStart(e) {
+      const icon = e.target.closest('.icon');
+      if (icon) {
+        e.dataTransfer.setData('index', icon.dataset.index);
+      }
+    }
+
+    function dragOver(e) {
+      e.preventDefault();
+    }
+
+    function drop(e) {
+      const fromIndex = e.dataTransfer.getData('index');
+      const toIndex = e.target.closest('.icon')?.dataset.index;
+      if (toIndex !== undefined && fromIndex !== undefined) {
+        const temp = links[fromIndex];
+        links[fromIndex] = links[toIndex];
+        links[toIndex] = temp;
+        localStorage.setItem('links', JSON.stringify(links));
+        renderLinks();
+      }
+    }
+
+    function dropToFolder(e, folderIndex) {
+      e.preventDefault();
+      const fromIndex = e.dataTransfer.getData('index');
+      const item = links[fromIndex];
+      if (item && links[folderIndex].children && folderIndex !== fromIndex) {
+        links[folderIndex].children.push(item);
+        links.splice(fromIndex, 1);
+        localStorage.setItem('links', JSON.stringify(links));
+        renderLinks();
+      }
+    }
+
+    function renderDock() {
+      const dock = document.getElementById('dock');
+      dock.innerHTML = '';
+      dockLinks.forEach((link, i) => {
+        const container = document.createElement('div');
+        container.style.position = 'relative';
+        container.style.textAlign = 'center';
+        const img = document.createElement('img');
+        img.src = link.icon;
+        img.alt = link.name;
+        img.title = link.name;
+        img.onclick = () => window.open(link.url, '_blank');
+        const removeBtn = document.createElement('button');
+        removeBtn.innerHTML = '×';
+        removeBtn.className = 'remove-button';
+        removeBtn.onclick = () => {
+          dockLinks.splice(i, 1);
+          localStorage.setItem('dockLinks', JSON.stringify(dockLinks));
+          renderDock();
+        };
+        container.appendChild(removeBtn);
+        container.appendChild(img);
+        dock.appendChild(container);
+      });
+    }
+
+    document.getElementById('dock').addEventListener('dragover', (e) => e.preventDefault());
+    document.getElementById('dock').addEventListener('drop', (e) => {
+      const fromIndex = e.dataTransfer.getData('index');
+      const link = links[fromIndex];
+      if (!dockLinks.some(l => l.url === link.url)) {
+        dockLinks.push(link);
+        localStorage.setItem('dockLinks', JSON.stringify(dockLinks));
+        renderDock();
+      }
+    });
+
+    renderLinks();
+    renderDock();
+  </script>
+</body>
+</html>
