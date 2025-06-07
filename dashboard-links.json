@@ -1,0 +1,36 @@
+{
+  "links": [
+    {
+      "name": "YNET",
+      "url": "https://www.ynet.co.il/home/0,7340,L-8,00.html",
+      "icon": "YNET.png "
+    },
+    {
+      "name": "פייסבוק",
+      "url": "https://www.facebook.com/",
+      "icon": "facebook.jpg"
+    },
+    {
+      "name": "devops",
+      "url": "https://vigder.visualstudio.com/_projects",
+      "icon": "devops.png"
+    }
+  ],
+  "dockLinks": [
+    {
+      "name": "YNET",
+      "url": "https://www.ynet.co.il/home/0,7340,L-8,00.html",
+      "icon": "YNET.png "
+    },
+    {
+      "name": "פייסבוק",
+      "url": "https://www.facebook.com/",
+      "icon": "facebook.jpg"
+    },
+    {
+      "name": "chatgpt",
+      "url": "https://chatgpt.com/",
+      "icon": "link.png"
+    }
+  ]
+}

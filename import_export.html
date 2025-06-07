@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ייבוא / ייצוא קישורים</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 40px;
+      text-align: center;
+      direction: rtl;
+    }
+    .panel {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: inline-block;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #0078d4;
+      color: white;
+      cursor: pointer;
+    }
+    input[type="file"] {
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h2>ייבוא / ייצוא קישורים</h2>
+    <button onclick="exportLinks()">📤 ייצוא קישורים</button>
+    <br>
+    <input type="file" accept="application/json" onchange="importLinks(event)">
+  </div>
+
+  <script>
+    function exportLinks() {
+      const links = localStorage.getItem('links') || '[]';
+      const dockLinks = localStorage.getItem('dockLinks') || '[]';
+      const data = {
+        links: JSON.parse(links),
+        dockLinks: JSON.parse(dockLinks)
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dashboard-links.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importLinks(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (Array.isArray(data.links)) localStorage.setItem('links', JSON.stringify(data.links));
+          if (Array.isArray(data.dockLinks)) localStorage.setItem('dockLinks', JSON.stringify(data.dockLinks));
+          alert('הייבוא הצליח! ניתן לרענן את הדף הראשי.');
+        } catch (err) {
+          alert('הקובץ אינו תקין');
+        }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
