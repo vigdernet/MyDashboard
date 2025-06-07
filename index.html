@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>My Dashboard</title>
-  <!-- My Dashboard: Version 1.10.2 -->
+  <!-- My Dashboard: Version 1.10.3 -->
   <!-- https://mydesktop.vigder.co.il/ -->
   <style>
     body {
@@ -153,6 +153,7 @@
        <option value="youtube">YouTube</option>
        <option value="facebook">Facebook</option>
        <option value="chatgpt">ChatGPT</option>
+       <option value="perplexity">Perplexity</option>
     </select>
     <!-- סוף: תפריט בחירה מקישורים מוכנים מראש -->
     <input type="text" id="linkName" placeholder="שם">
@@ -310,7 +311,7 @@ const predefinedLinks = {
   youtube: {
     name: "YouTube",
     url: "https://www.youtube.com",
-    icon: "https://www.youtube.com/s/desktop/fe9f1b29/img/favicon.ico"
+    icon: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.youtube.com&size=64"
   },
   vigder: {
     name: "vigder.co.il",
@@ -321,6 +322,11 @@ const predefinedLinks = {
     name: "ChatGPT",
     url: "https://chatgpt.com/",
     icon: "https://chatgpt.com/favicon.ico"
+  },
+  perplexity: {
+    name: "perplexity",
+    url: "https://www.perplexity.ai/",
+    icon: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.perplexity.ai/&size=64"
   },
   facebook: {
     name: "Facebook",
